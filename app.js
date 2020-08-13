@@ -1,12 +1,12 @@
 const express = require('express');
 const dotenv = require('dotenv');
 
-const app = express();
+dotenv.config({ path: './config.env' });
 
+const app = express();
+// router
 app.get('/', (req, res) => {
    res.send('first CALL');
 });
 
-// server started!
-const port = 3000;
-app.listen(port);
+module.exports = app;
