@@ -8,7 +8,12 @@ dotenv.config({ path: './config.env' });
 //Connect to DB.
 const DB = process.env.DATABASE.replace(
    '<PASSWORD>',
-   { useNewUrlParser: true },
+   {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+   },
    process.env.PASSWORD
 );
 
