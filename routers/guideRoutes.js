@@ -1,13 +1,14 @@
 const express = require('express');
+const tourController = require('./../controllers/GuideTourController');
 
 const router = express.Router();
 
-router.route('/nice').get((req, res) => {
-   res.send('NICE POST!');
-});
+router.route('/').get(tourController.getallTours).post(tourController.postTour);
 
-router.route('/').get((req, res) => {
-   res.send('First Call!');
-});
+router
+   .route(`/:id`)
+   .get(tourController.getTour)
+   .patch(tourController.updateTour)
+   .delete(tourController.deleteTour);
 
 module.exports = router;

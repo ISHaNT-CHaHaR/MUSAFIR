@@ -27,6 +27,6 @@ const guideTourSchema = new mongoose.Schema({
    },
 });
 
-const guideTour = mogoose.model('guideTour', guideTourSchema);
+const guideTour = mongoose.model('guideTour', guideTourSchema);
 
 module.exports = guideTour;
