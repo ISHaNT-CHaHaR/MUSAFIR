@@ -1,10 +1,25 @@
 const Tour = require('./../models/guideTour');
+const features = require('./../utils/Features');
+
+exports.topcheap = async (req, res, next) => {
+   req.query.limit = '5';
+   req.query.sort = 'price';
+   req.query.fields = 'place,provider,duration,price,summary';
+   next();
+};
 
 exports.getallTours = async (req, res) => {
    try {
-      const Tours = await Tour.find();
+      const Features = new features(Tour.find(), req.query)
+         .filter()
+         .sort()
+         .paginate()
+         .fields();
+
+      const Tours = await Features.query;
       res.status(200).json({
          status: 'success',
+         length: Tours.length,
          data: {
             Tours,
          },
