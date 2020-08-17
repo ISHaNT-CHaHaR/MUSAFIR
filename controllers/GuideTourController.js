@@ -80,3 +80,18 @@ exports.updateTour = async (req, res) => {
       data: { updateOne },
    });
 };
+
+exports.placesSort = async (req, res, next) => {
+   let place = req.params.place;
+
+   const Placetour = await Tour.find({
+      place: `${place}`,
+   });
+
+   res.status(200).json({
+      status: 'success',
+      data: {
+         Placetour,
+      },
+   });
+};
