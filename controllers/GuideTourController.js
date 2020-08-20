@@ -27,7 +27,7 @@ exports.getallTours = catchAsync(async (req, res) => {
          },
       });
    } catch (err) {
-      res.staus(402).json({
+      res.status(404).json({
          error: err,
          message: err.message,
       });
@@ -56,7 +56,7 @@ exports.postTour = catchAsync(async (req, res) => {
    });
 });
 
-exports.deleteTour = catchAsync(async (req, res) => {
+exports.deleteTour = catchAsync(async (req, res, next) => {
    const tour = await Tour.findByIdAndDelete(req.params.id);
 
    if (!tour) {
@@ -69,7 +69,7 @@ exports.deleteTour = catchAsync(async (req, res) => {
    });
 });
 
-exports.updateTour = catchAsync(async (req, res) => {
+exports.updateTour = catchAsync(async (req, res, next) => {
    const updateOne = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -92,10 +92,34 @@ exports.placesSort = catchAsync(async (req, res, next) => {
       place: `${place}`,
    });
 
+   if (!Placetour) {
+      return next(appErr('No Requested Data found!', 404));
+   }
    res.status(200).json({
       status: 'success',
       data: {
          Placetour,
       },
    });
+   next();
 });
+
+// exports.cheapByPlace = catchAsync(async (req, res, next) => {
+//    let place = req.params.place;
+//    req.query.limit = '5';
+//    req.query.sort = 'price';
+//    req.query.fields = 'place,provider,duration,price,summary';
+
+// const placeTour = await Tour.find({
+//    place = `${place}`,
+// })
+
+//    const Features = new features(placeTour,req.query)
+//    .sort()
+//    .filter()
+//    .paginate()
+//    .limit();
+
+//       const Tours = await Features.query;
+
+// });

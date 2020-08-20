@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 
 const guideRoutes = require('./routers/guideRoutes');
+const appErr = require('./utils/appErr');
+const globalHandler = require('./controllers/errorcontroller');
 
 dotenv.config({ path: './config.env' });
 
@@ -21,5 +23,11 @@ app.use((req, res, next) => {
 // router
 
 app.use('/api/v1/guides', guideRoutes);
+
+app.all('*', (req, res, next) => {
+   next(new appErr(`Can't find ${req.originalUrl} on this Server!`, 404));
+});
+
+app.use(globalHandler);
 
 module.exports = app;
