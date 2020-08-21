@@ -88,9 +88,21 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 exports.placesSort = catchAsync(async (req, res, next) => {
    let place = req.params.place;
 
-   const Placetour = await Tour.find({
-      place: `${place}`,
-   });
+   const Placetour = await Tour.aggregate([
+      {
+         $match: {
+            place: `${place}`,
+         },
+      },
+      {
+         $sort: {
+            price: 1,
+         },
+      },
+      // {
+      //    $limit: 1,
+      // },
+   ]);
 
    if (!Placetour) {
       return next(appErr('No Requested Data found!', 404));

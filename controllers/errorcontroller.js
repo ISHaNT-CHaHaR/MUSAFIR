@@ -20,7 +20,8 @@ const sendErrorProd = (err, res) => {
 
       res.status(500).json({
          status: 'error',
-         message: 'Something went Wrong!',
+         message: err.message,
+         
       });
    }
 };
@@ -28,8 +29,7 @@ const sendErrorProd = (err, res) => {
 ////////////////////////////////For Invalid IDS////////////////////////////////////////////
 
 const handleCastError = (error) => {
-   const message = `Invalid ${error.path}: ${error.value}`;
-   return new appErr(message, 404);
+   return new appErr(error.message, 404);
 };
 
 module.exports = (err, req, res, next) => {
@@ -39,11 +39,11 @@ module.exports = (err, req, res, next) => {
    if (process.env.NODE_ENV === 'development') {
       sendErrorDev(err, res);
    } else if (process.env.NODE_ENV === 'production') {
-      let error = { ...err };
+     
 
-      if (error.name === 'CastError') {
-         error = handleCastError(error);
-      }
-      sendErrorProd(error, res);
+      // if (error.name === 'CastError') {
+      //    error = handleCastError(error);
+      // }
+      sendErrorProd(err, res);
    }
 };
