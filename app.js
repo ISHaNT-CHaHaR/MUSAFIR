@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 
 const guideRoutes = require('./routers/guideRoutes');
+const userRoutes = require('./routers/userRoutes');
+
 const appErr = require('./utils/appErr');
 const globalHandler = require('./controllers/errorcontroller');
 
@@ -23,6 +25,7 @@ app.use((req, res, next) => {
 // router
 
 app.use('/api/v1/guides', guideRoutes);
+app.use('/api/v1/user', userRoutes);
 
 app.all('*', (req, res, next) => {
    next(new appErr(`Can't find ${req.originalUrl} on this Server!`, 404));
