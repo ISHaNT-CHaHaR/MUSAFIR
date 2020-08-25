@@ -37,7 +37,7 @@ exports.getallTours = catchAsync(async (req, res) => {
 exports.getTour = catchAsync(async (req, res, next) => {
    const tour = await Tour.findById(req.params.id);
    if (!tour) {
-      return next(appErr('No Guide Tour with this id', 404));
+      return next(new appErr('No Guide Tour with this id', 404));
    }
    res.status(200).json({
       status: 'success!',
@@ -60,7 +60,7 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
    const tour = await Tour.findByIdAndDelete(req.params.id);
 
    if (!tour) {
-      return next(appErr('No Tour with this ID', 404));
+      return next(new appErr('No Tour with this ID', 404));
    }
 
    res.status(204).json({
@@ -76,7 +76,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
    });
 
    if (!updateOne) {
-      return next(appErr('No Tour with this ID', 404));
+      return next(new appErr('No Tour with this ID', 404));
    }
 
    res.status(200).json({
@@ -105,7 +105,7 @@ exports.placesSort = catchAsync(async (req, res, next) => {
    ]);
 
    if (!Placetour) {
-      return next(appErr('No Requested Data found!', 404));
+      return next(new appErr('No Requested Data found!', 404));
    }
    res.status(200).json({
       status: 'success',
