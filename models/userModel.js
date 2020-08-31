@@ -7,12 +7,12 @@ const userSchema = new Mongoose.Schema(
    {
       name: {
          type: String,
-         required: true,
+         required: [true, 'Please tell your email'],
          max: 30,
       },
       email: {
          type: String,
-         required: true,
+         required: [true, 'Please provide your Email!'],
          max: 100,
          unique: true,
          lowercase: true,
@@ -30,7 +30,6 @@ const userSchema = new Mongoose.Schema(
             validator: function (el) {
                return el === this.password;
             },
-            message: 'Passwords are not same!',
          },
          select: false,
       },
@@ -45,19 +44,28 @@ const userSchema = new Mongoose.Schema(
    // }
 );
 
-userSchema.pre('save', function (next) {
-   this.password = crypto
-      .createHash('sha256')
-      .update(this.password)
-      .digest('hex');
+// userSchema.pre('save', function (next) {
+//    this.password = crypto
+//       .createHash('sha256')
+//       .update(this.password)
+//       .digest('hex');
 
-   this.passwordConfirm = crypto
-      .createHash('sha256')
-      .update(this.passwordConfirm)
-      .digest('hex');
+//    this.passwordConfirm = crypto
+//       .createHash('sha256')
+//       .update(this.passwordConfirm)
+//       .digest('hex');
+//    next();
+// });
+
+userSchema.pre('save', async function (next) {
+   if (!this.isModified('password')) return next(); // if password was actually modified.
+   this.password = await bcrypt.hash(this.password, 11);
+
+   this.passwordConfirm = undefined;
    next();
 });
 
 const User = Mongoose.model('userSchema', userSchema);
 
 module.exports = User;
+ 

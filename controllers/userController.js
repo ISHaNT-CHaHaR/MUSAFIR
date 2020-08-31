@@ -4,14 +4,15 @@ const appErr = require('./../utils/appErr');
 
 ///////////////////////////////////     Register?????????///////////////////////
 exports.register = catchAsync(async (req, res, next) => {
-   const user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
-   });
+   // const user = new User({
+   //    name: req.body.name,
+   //    email: req.body.email,
+   //    password: req.body.password,
+   // });
 
-   const userSave = await user.save();
+   // const userSave = await user.save();
+
+   const userSave = await User.create(req.body);
 
    res.status(201).json({
       status: 'success',
@@ -22,9 +23,23 @@ exports.register = catchAsync(async (req, res, next) => {
 
 //////////////////////////////     LOGIN  ////////////////////////////////////////
 exports.login = catchAsync(async (req, res, next) => {
-   res.status(201).json({
-      status: 'success',
-   });
+   const { email, password } = req.body;
+
+   if (!email || !password) {
+      next(new appErr('Please provide email and password', 400));
+   }
+
+   const UserEmail = await User.findOne(email);
+
+   console.log(UserEmail.password);
+
+   if (password === UserEmail.password) {
+      res.status(201).json({
+         status: 'success',
+      });
+   } else {
+      return next(new appErr('Not a Valid User!', 404));
+   }
 });
 
 /////////////////////////////// LOGIN ///////////////////////////////////////////
