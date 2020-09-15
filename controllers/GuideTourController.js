@@ -1,14 +1,16 @@
 const Tour = require('./../models/guideTour');
 const features = require('./../utils/Features');
+const catchAsync = require('./../utils/catchAsync');
+const appErr = require('./../utils/appErr');
 
-exports.topcheap = async (req, res, next) => {
+exports.topcheap = (req, res, next) => {
    req.query.limit = '5';
    req.query.sort = 'price';
    req.query.fields = 'place,provider,duration,price,summary';
    next();
 };
 
-exports.getallTours = async (req, res) => {
+exports.getallTours = async (req, res, next) => {
    try {
       const Features = new features(Tour.find(), req.query)
          .filter()
@@ -25,27 +27,25 @@ exports.getallTours = async (req, res) => {
          },
       });
    } catch (err) {
-      res.staus(402).json({
+      res.status(404).json({
          error: err,
          message: err.message,
       });
    }
 };
 
-exports.getTour = async (req, res) => {
+exports.getTour = catchAsync(async (req, res, next) => {
    const tour = await Tour.findById(req.params.id);
    if (!tour) {
-      res.status(404).json({
-         data: 'Not Found!',
-      });
+      return next(new appErr('No Guide Tour with this id', 404));
    }
    res.status(200).json({
       status: 'success!',
       data: tour,
    });
-};
+});
 
-exports.postTour = async (req, res) => {
+exports.postTour = catchAsync(async (req, res) => {
    const newTour = await Tour.create(req.body);
 
    await res.status(201).json({
@@ -54,44 +54,84 @@ exports.postTour = async (req, res) => {
          tour: newTour,
       },
    });
-};
+});
 
-exports.deleteTour = async (req, res) => {
-   await Tour.findByIdAndDelete(req.params.id);
-   res.status(201).json({
+exports.deleteTour = catchAsync(async (req, res, next) => {
+   const tour = await Tour.findByIdAndDelete(req.params.id);
+
+   if (!tour) {
+      return next(new appErr('No Tour with this ID', 404));
+   }
+
+   res.status(204).json({
       status: 'success',
+      data: null,
    });
-};
+});
 
-exports.updateTour = async (req, res) => {
+exports.updateTour = catchAsync(async (req, res, next) => {
    const updateOne = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
    });
 
    if (!updateOne) {
-      res.status(404).json({
-         message: 'Tour Not found!',
-      });
+      return next(new appErr('No Tour with this ID', 404));
    }
 
    res.status(200).json({
       status: 'success',
       data: { updateOne },
    });
-};
+});
 
-exports.placesSort = async (req, res, next) => {
+exports.placesSort = catchAsync(async (req, res, next) => {
    let place = req.params.place;
 
-   const Placetour = await Tour.find({
-      place: `${place}`,
-   });
+   const Placetour = await Tour.aggregate([
+      {
+         $match: {
+            place: `${place}`,
+         },
+      },
+      {
+         $sort: {
+            price: 1,
+         },
+      },
+      // {
+      //    $limit: 1,
+      // },
+   ]);
 
+   if (!Placetour) {
+      return next(new appErr('No Requested Data found!', 404));
+   }
    res.status(200).json({
       status: 'success',
       data: {
          Placetour,
       },
    });
-};
+   next();
+});
+
+// exports.cheapByPlace = catchAsync(async (req, res, next) => {
+//    let place = req.params.place;
+//    req.query.limit = '5';
+//    req.query.sort = 'price';
+//    req.query.fields = 'place,provider,duration,price,summary';
+
+// const placeTour = await Tour.find({
+//    place = `${place}`,
+// })
+
+//    const Features = new features(placeTour,req.query)
+//    .sort()
+//    .filter()
+//    .paginate()
+//    .limit();
+
+//       const Tours = await Features.query;
+
+// });
