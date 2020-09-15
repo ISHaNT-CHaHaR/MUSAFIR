@@ -1,6 +1,14 @@
+const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
+
 const catchAsync = require('./../utils/catchAsync');
 const appErr = require('./../utils/appErr');
+
+const signToken = (id) => {
+   return jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+   });
+};
 
 ///////////////////////////////////     Register?????????///////////////////////
 exports.register = catchAsync(async (req, res, next) => {
@@ -12,11 +20,19 @@ exports.register = catchAsync(async (req, res, next) => {
 
    // const userSave = await user.save();
 
-   const userSave = await User.create(req.body);
+   const userSave = await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm,
+   });
 
+   const token = signToken(userSave._id);
    res.status(201).json({
       status: 'success',
-      data: userSave,
+      token,
+
+      data: { user: userSave },
    });
 });
 ////////////////////////////////// REGISTER????????????????????????????????????///////
@@ -26,20 +42,25 @@ exports.login = catchAsync(async (req, res, next) => {
    const { email, password } = req.body;
 
    if (!email || !password) {
+      // check if exists.
       next(new appErr('Please provide email and password', 400));
    }
 
-   const UserEmail = await User.findOne(email);
+   // check if user exists and password is correct!
+   const user = await User.findOne({ email }).select('+password');
 
-   console.log(UserEmail.password);
+   const correct = await user.correctPassword(password, user.password);
 
-   if (password === UserEmail.password) {
-      res.status(201).json({
-         status: 'success',
-      });
-   } else {
-      return next(new appErr('Not a Valid User!', 404));
+   if (!user || !correct) {
+      return next(new appErr('Incorrect Email or Password!', 401));
    }
+
+   // if everything is okay.. send token to client.
+   const token = signToken(user._id);
+   res.status(201).json({
+      status: 'success',
+      token,
+   });
 });
 
 /////////////////////////////// LOGIN ///////////////////////////////////////////

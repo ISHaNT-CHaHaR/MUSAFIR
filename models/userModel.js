@@ -22,6 +22,7 @@ const userSchema = new Mongoose.Schema(
          type: String,
          required: true,
          minlength: 8,
+         select: false,
       },
       passwordConfirm: {
          type: String,
@@ -60,12 +61,17 @@ const userSchema = new Mongoose.Schema(
 userSchema.pre('save', async function (next) {
    if (!this.isModified('password')) return next(); // if password was actually modified.
    this.password = await bcrypt.hash(this.password, 11);
-
    this.passwordConfirm = undefined;
    next();
 });
 
+userSchema.methods.correctPassword = async function (
+   candidatePassword,
+   userPassword
+) {
+   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
 const User = Mongoose.model('userSchema', userSchema);
 
 module.exports = User;
- 
