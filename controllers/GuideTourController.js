@@ -10,7 +10,7 @@ exports.topcheap = (req, res, next) => {
    next();
 };
 
-exports.getallTours = catchAsync(async (req, res) => {
+exports.getallTours = async (req, res, next) => {
    try {
       const Features = new features(Tour.find(), req.query)
          .filter()
@@ -32,7 +32,7 @@ exports.getallTours = catchAsync(async (req, res) => {
          message: err.message,
       });
    }
-});
+};
 
 exports.getTour = catchAsync(async (req, res, next) => {
    const tour = await Tour.findById(req.params.id);

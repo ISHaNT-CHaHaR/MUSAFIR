@@ -111,3 +111,9 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 });
 
 /////////////////////////////// delete Tour ///////////////////////////////
+
+exports.protect = catchAsync((req, res, next) => {
+   
+
+   next();
+});

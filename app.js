@@ -19,7 +19,8 @@ app.use(express.json()); //body paerser.
 
 app.use((req, res, next) => {
    req.requestTime = new Date().toISOString();
-   console.log(req.requestTime);
+   console.log(req.headers);
+
    next();
 });
 // router

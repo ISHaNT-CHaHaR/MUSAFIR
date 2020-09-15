@@ -1,6 +1,6 @@
 const express = require('express');
 const tourController = require('./../controllers/GuideTourController');
-
+const userController = require('./../controllers/userController');
 const router = express.Router();
 
 router.route('/cheap').get(tourController.topcheap, tourController.getallTours);
