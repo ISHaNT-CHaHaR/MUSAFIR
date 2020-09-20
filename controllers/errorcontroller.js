@@ -1,3 +1,4 @@
+const app = require('../app');
 const appErr = require('./../utils/appErr');
 
 const sendErrorDev = (err, res) => {
@@ -18,10 +19,9 @@ const sendErrorProd = (err, res) => {
    } else {
       console.log('Error', err);
 
-      res.status(500).json({
+      res.status(401).json({
          status: 'error',
          message: err.message,
-         
       });
    }
 };
@@ -32,6 +32,15 @@ const handleCastError = (error) => {
    return new appErr(error.message, 404);
 };
 
+const handleJWTError = () => {
+   new appErr('Invalid Token, Please Login again!', 401);
+};
+
+const handleJWTExpired = () => {
+   new appErr('Token Expired, Please Login Again!', 401);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
 module.exports = (err, req, res, next) => {
    err.statusCode = err.statusCode || 500;
    err.status = err.status || 'error';
@@ -39,11 +48,13 @@ module.exports = (err, req, res, next) => {
    if (process.env.NODE_ENV === 'development') {
       sendErrorDev(err, res);
    } else if (process.env.NODE_ENV === 'production') {
-     
+      let error = { ...err };
+      if (error.name === 'CastError') {
+         error = handleCastError(error);
+      }
 
-      // if (error.name === 'CastError') {
-      //    error = handleCastError(error);
-      // }
+      if (error.name === 'JsonWebTokenError') error = handleJWTError(error);
+      if (error.name === 'TokenExpiredError') error = handleJWTExpired(error);
       sendErrorProd(err, res);
    }
 };

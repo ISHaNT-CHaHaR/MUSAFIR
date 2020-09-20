@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 
@@ -112,8 +113,37 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 
 /////////////////////////////// delete Tour ///////////////////////////////
 
-exports.protect = catchAsync((req, res, next) => {
-   
+exports.protect = catchAsync(async (req, res, next) => {
+   // getting token and  check if its there...
+   let token;
+   if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+   ) {
+      token = req.headers.authorization.split(' ')[1];
+   }
+
+   if (!token) {
+      return next(new appErr('You are not logged in! Please LOGIN!', 401));
+   }
+
+   // verification token.
+
+   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+   /// 3rd function is a callback function so I need to promisify this method!
+
+   // check if user still exists...
+   // This is for when a user gets deleted in the meantime . but the Token will exist.
+
+   const freshUser = User.findById(decoded.id);
+
+   if (!freshUser) {
+      return next(
+         new appErr('User belonging to this Token, No longer exists!', 401)
+      );
+   }
+
+   // check if user changed password..
 
    next();
 });

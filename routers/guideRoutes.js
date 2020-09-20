@@ -15,6 +15,9 @@ router
 
 router.route('/filter/:place').get(tourController.placesSort);
 
-router.route('/').get(tourController.getallTours).post(tourController.postTour);
+router
+   .route('/')
+   .get(userController.protect, tourController.getallTours)
+   .post(tourController.postTour);
 
 module.exports = router;
