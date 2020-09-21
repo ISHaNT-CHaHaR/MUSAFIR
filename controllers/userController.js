@@ -26,6 +26,7 @@ exports.register = catchAsync(async (req, res, next) => {
       email: req.body.email,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
+      role: req.body.role,
    });
 
    const token = signToken(userSave._id);
@@ -33,7 +34,7 @@ exports.register = catchAsync(async (req, res, next) => {
       status: 'success',
       token,
 
-      data: { user: userSave },
+      data: { userSave },
    });
 });
 ////////////////////////////////// REGISTER????????????????????????????????????///////
@@ -73,7 +74,7 @@ exports.getAllusers = catchAsync(async (req, res, next) => {
    res.status(201).json({
       status: 'success',
       length: AllUsers.length,
-      Users: AllUsers,
+      data: AllUsers,
    });
 });
 ////////////////////////////////  get All Users //////////////////////////////////
@@ -135,7 +136,7 @@ exports.protect = catchAsync(async (req, res, next) => {
    // check if user still exists...
    // This is for when a user gets deleted in the meantime . but the Token will exist.
 
-   const freshUser = User.findById(decoded.id);
+   const freshUser = await User.findById(decoded.id);
 
    if (!freshUser) {
       return next(
@@ -144,6 +145,23 @@ exports.protect = catchAsync(async (req, res, next) => {
    }
 
    // check if user changed password..
-
+   req.user = freshUser;
+   console.log(req.user.role);
    next();
 });
+///////////////////////////////restrictTO/////////////////////////////////////////////////
+
+exports.restrictTo = (...roles) => {
+   return (req, res, next) => {
+      /// roles ['admin', oranything]// not role [user, guide]
+
+      if (!roles.includes(req.user.role)) {
+         return next(
+            new appErr('You do not have permission to perform this action', 403)
+         );
+      }
+      next();
+   };
+};
+
+//////////////////////////////////////////////////////////////////////////////////////

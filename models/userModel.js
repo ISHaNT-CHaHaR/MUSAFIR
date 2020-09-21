@@ -2,6 +2,7 @@ const Mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const crypto = require('crypto');
+const { string } = require('joi');
 
 const userSchema = new Mongoose.Schema(
    {
@@ -17,6 +18,11 @@ const userSchema = new Mongoose.Schema(
          unique: true,
          lowercase: true,
          validate: [validator.isEmail, 'Please enter a valid Email'],
+      },
+      role: {
+         type: String,
+         enum: ['admin', 'guide', 'user'],
+         default: 'user',
       },
       password: {
          type: String,

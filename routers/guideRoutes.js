@@ -11,7 +11,11 @@ router
    .route(`/:id`)
    .get(tourController.getTour)
    .patch(tourController.updateTour)
-   .delete(tourController.deleteTour);
+   .delete(
+      userController.protect,
+      userController.restrictTo('admin'),
+      tourController.deleteTour
+   );
 
 router.route('/filter/:place').get(tourController.placesSort);
 
